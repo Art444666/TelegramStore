@@ -10,11 +10,11 @@ from yookassa import Configuration, Payment
 
 
 
-Configuration.configure('твой_shopId', 'твой_secretKey')
+
 
 
 app = Flask(__name__)
-app.secret_key = "ultimate_steam_with_registration_v6"
+app.secret_key = "ultimate_steam_with_registration_v686586786877878657564678658658976865765765765"
 
 # ==========================================================
 # ТВОЙ МАССИВ ДАННЫХ
@@ -26,7 +26,7 @@ DEFAULT_DATA = {
         {
             "id": 0, 
             "title": "Cyberpunk 2077", 
-            "price": 1999, 
+            "price": 0, 
             "cat": "RPG", 
             "dev": "CD PROJEKT RED", 
             "img": "https://unsplash.com", 
@@ -197,67 +197,7 @@ def profile():
     
     return render_template_string(TOP + """
     <h2>Мой профиль: {{ user.username }}</h2>
-    <div style="background:var(--card); padding:20px; border-radius:8px;">
-        <p style="font-size:24px;">Баланс: <span style="color:var(--green)">{{ user.balance }} ₽</span></p>
-        <hr style="border-color: #333; margin: 20px 0;">
-        <h3>Пополнение баланса (ЮKassa)</h3>
-        <form action="/create-payment" method="post">
-            <input type="number" name="amount" placeholder="Сумма пополнения (мин. 100)" min="100" required>
-            <button type="submit" class="btn btn-green" style="width: 100%;">ПЕРЕЙТИ К ОПЛАТЕ</button>
-        </form>
-    </div>
-    </div>""", user=user)
-
-@app.route('/create-payment', methods=['POST'])
-def create_payment():
-    if 'user' not in session: return redirect('/login')
-    
-    amount = request.form.get('amount')
-    
-    # Создаем объект платежа
-    idempotence_key = str(uuid.uuid4())
-    payment = Payment.create({
-        "amount": {
-            "value": amount,
-            "currency": "RUB"
-        },
-        "confirmation": {
-            "type": "redirect",
-            "return_url": url_for('payment_callback', _external=True)
-        },
-        "capture": True,
-        "description": f"Пополнение счета для {session['user']}"
-    }, idempotence_key)
-
-    # Сохраняем ID платежа в сессии, чтобы проверить его при возврате
-    session['pending_payment_id'] = payment.id
-    session['pending_amount'] = amount
-
-    # Перенаправляем пользователя на страницу ЮKassa для ввода карты
-    return redirect(payment.confirmation.confirmation_url)
-
-@app.route('/payment-callback')
-def payment_callback():
-    if 'user' not in session: return redirect('/')
-    
-    payment_id = session.get('pending_payment_id')
-    amount = session.get('pending_amount')
-    
-    if payment_id:
-        payment = Payment.find_one(payment_id)
-        
-        # Если платеж прошел успешно
-        if payment.status == 'succeeded':
-            user = next((u for u in DATA['users'] if u['username'] == session['user']), None)
-            if user:
-                user['balance'] += float(amount)
-                save_data(DATA) # Сохраняем изменения в JSON
-                flash(f"Баланс пополнен на {amount} ₽!")
-            
-        session.pop('pending_payment_id', None)
-        session.pop('pending_amount', None)
-        
-    return redirect(url_for('profile'))
+    """, user=user)
 
 
 @app.route('/admin', methods=['GET', 'POST'])
