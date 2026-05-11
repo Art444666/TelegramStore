@@ -7,6 +7,7 @@ import zipfile
 from datetime import datetime
 import uuid
 from yookassa import Configuration, Payment
+import re
 
 
 
@@ -187,6 +188,12 @@ def game_detail(id):
     """
     return render_template_string(TOP + content + "</div>", game=game, is_owned=is_owned)
 
+def get_video_id(url):
+    """Умный поиск ID видео в любой ссылке YouTube"""
+    regex = r"(?:v=|\/)([0-9A-Za-z_-]{11})(?:[\?&]|$)"
+    match = re.search(regex, url)
+    return match.group(1) if match else None
+
 @app.route('/profile', methods=['GET'])
 def profile():
     if 'user' not in session: return redirect('/login')
@@ -195,9 +202,35 @@ def profile():
         session.clear()
         return redirect('/login')
     
+    # Твоя ссылка на видео
+    video_url = "https://www.youtube.com/watch?v=2hSKxFJbE_8&t=16s"
+    v_id = get_video_id(video_url)
+    
     return render_template_string(TOP + """
-    <h2>Мой профиль: {{ user.username }}</h2>
-    """, user=user)
+    <div style="background:var(--card); padding:20px; border-radius:8px;">
+        <h2>Мой профиль: {{ user.username }}</h2>
+        <p style="font-size:18px;">Баланс: <span style="color:var(--green)">{{ user.balance }} ₽</span></p>
+        
+        <hr style="border-color:#333; margin:20px 0;">
+        
+        <h3 style="margin-bottom:15px;">Трейлер недели: АНТИПИРАТСКИЙ ЗАГОН</h3>
+        
+        <!-- КОНТЕЙНЕР ПЛЕЕРА -->
+        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background: #000;">
+            <iframe 
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+                src="https://youtube.com{{ v_id }}" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            < /iframe>
+        </div>
+        
+        <p style="color:#888; font-size:14px; margin-top:10px;">
+            Помните: "Мы не пираты — йо-хо, легальный контент!"
+        </p>
+    </div>
+    </div>""", user=user, v_id=v_id)
 
 
 @app.route('/admin', methods=['GET', 'POST'])
