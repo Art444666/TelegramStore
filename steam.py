@@ -202,10 +202,30 @@ def profile():
         session.clear()
         return redirect('/login')
     
+    # Твой HTML с плеером, обернутый в стиль профиля
+    content = """
+    <div style="background:var(--card); padding:30px; border-radius:8px; text-align:center;">
+        <h2 style="margin-bottom:20px;">Профиль: {{ user.username }}</h2>
+        <p style="font-size:20px; color:var(--green); margin-bottom:30px;">Баланс: {{ user.balance }} ₽</p>
+        
+        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+            <iframe 
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+                src="https://www.youtube.com/embed/2hSKxFJbE_8" 
+                title="МЫ НЕ ПИРАТЫ!" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin" 
+                allowfullscreen>
+            </iframe>
+        </div>
+        
+        <p style="margin-top:20px; color:#888; font-style:italic;">"Мы не Пираты — йо-хо, легальный контент!"</p>
+    </div>
+    """
     
-    
-    return render_template_string(TOP + """
-    <iframe width="978" height="547" src="https://www.youtube.com/embed/2hSKxFJbE_8" title="МЫ НЕ ПИРАТЫ!" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>""", user=user, v_id=v_id)
+    return render_template_string(TOP + content + "</div>", user=user)
+
 
 
 @app.route('/admin', methods=['GET', 'POST'])
